@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Ventas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+
+    <img
+      src="entel.png"
+      alt="Entel"
+      class="login-logo"
+    >
+
+    <h2>Acceso a Ventas</h2>
+
+    <input
+      type="password"
+      id="password"
+      placeholder="Ingresa tu contraseña"
+      autocomplete="current-password"
+    >
+
+    <button class="btn" id="btn-login">
+      Ingresar
+    </button>
+
+    <div id="login-error"></div>
+
+  </div>
+</div>
+
+<div id="dashboard" hidden>
+  <button class="menu-btn" id="btn-menu" aria-label="Menú">☰</button>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="logo"><div class="logo-dot">GP</div><span>Equipo de ventas de Entel</span></div>
+
+    <span class="nav-label">Vistas</span>
+    <button class="nav-item active" data-view="resumen">Resumen general</button>
+    <button class="nav-item" data-view="detalle">Detalle de ventas</button>
+    <button class="nav-item" data-view="ejecutivos">Por ejecutivo</button>
+
+    <span class="nav-label">Sistema</span>
+    <button class="nav-item" id="btn-refresh">Actualizar datos</button>
+    <button class="nav-item" id="btn-logout">Cerrar sesión</button>
+
+    <div class="sidebar-footer">
+      <div id="sidebar-status"></div>
+      <div id="sidebar-count"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section id="view-resumen" class="view active">
+      <div class="topbar">
+        <div>
+          <h1>Resumen del mes actual</h1>
+          <p id="resumen-subtitle"></p>
+        </div>
+
+        <div class="topbar-right">
+          <select id="filtro-ej-resumen"></select>
+
+          <img
+            src="entel.png"
+            alt="Entel"
+            class="dashboard-logo"
+          >
+        </div>
+    </div>
+      <div class="metrics" id="metrics"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Distribución de estados</div>
+          <div class="donut-wrap">
+            <canvas id="donutChart" width="160" height="160"></canvas>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Progreso por ejecutivo</div>
+          <div id="ej-bars"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-detalle" class="view">
+      <div class="topbar">
+        <div><h1>Detalle de ventas</h1><p>Todos los registros de la hoja</p></div>
+        <button class="btn admin-only" id="btn-nuevo">+ Nuevo registro</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <input type="text" id="f-nombre" placeholder="Buscar cliente...">
+          <select id="f-ejecutivo"></select>
+          <select id="f-estado">
+            <option value="todos">Todos los estados</option>
+            <option value="I">Instalado</option>
+            <option value="P">Pendiente</option>
+            <option value="R">Rechazado</option>
+            <option value="AM">Pendiente anterior mes</option>
+          </select>
+          <select id="f-plan"></select>
+        </div>
+        <div class="table-scroll"><table id="tabla-detalle"></table></div>
+      </div>
+    </section>
+
+    <section id="view-ejecutivos" class="view">
+      <div class="topbar">
+        <div><h1>Por ejecutivo</h1><p>Detalle individual de cada vendedor</p></div>
+        <select id="sel-ej"></select>
+      </div>
+      <div class="metrics" id="metrics-ej"></div>
+      <div class="table-card">
+        <div class="table-header">
+          <strong id="ej-table-title">Ventas</strong>
+          <select id="f-estado-ej">
+            <option value="todos">Todos los estados</option>
+            <option value="I">Instalado</option>
+            <option value="P">Pendiente</option>
+            <option value="R">Rechazado</option>
+            <option value="AM">Pendiente anterior mes</option>
+          </select>
+        </div>
+        <div class="table-scroll"><table id="tabla-ej"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal CRUD (solo admin) -->
+  <div class="modal" id="modal" hidden>
+    <form class="modal-box" id="form-reg">
+      <h3 id="modal-title">Nuevo registro</h3>
+      <label>Plan<input name="plan" required></label>
+      <label>Estado
+        <select name="estado">
+          <option value="P">Pendiente</option>
+          <option value="I">Instalado</option>
+          <option value="R">Rechazado</option>
+          <option value="AM">Pendiente anterior mes</option>
+        </select>
+      </label>
+      <label>Ejecutivo<input name="ejecutivo" required list="lista-ej"></label>
+      <datalist id="lista-ej"></datalist>
+      <label>Cliente<input name="cliente" required></label>
+      <label>Celular<input name="celular"></label>
+      <label>Fecha de ingreso<input type="date" name="fecha"></label>
+      <label>Fecha de instalación<input type="date" name="fecIns"></label>
+      <label>Observaciones<input name="obs"></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btn-cancel">Cancelar</button>
+        <button type="submit" class="btn" id="btn-save">Guardar cambios</button>
+      </div>
+      <div class="status-msg" id="form-status"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
